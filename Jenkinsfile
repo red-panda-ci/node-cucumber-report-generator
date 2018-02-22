@@ -1,6 +1,6 @@
 #!groovy
 
-@Library('github.com/red-panda-ci/jenkins-pipeline-library@v2.5.0') _
+@Library('github.com/red-panda-ci/jenkins-pipeline-library@v2.6.1') _
 
 // Initialize global config
 cfg = jplConfig('repogen', 'backend', '', [email:'redpandaci+repogen@gmail.com'])
@@ -23,29 +23,22 @@ pipeline {
         }
         stage ('Test') {
             agent { label 'docker' }
-            when { expression { (env.BRANCH_NAME == 'develop') || env.BRANCH_NAME.startsWith('PR-') || env.BRANCH_NAME.startsWith('release/v') } }
+            when { expression { (env.BRANCH_NAME == 'develop') || env.BRANCH_NAME.startsWith('PR-') } }
             steps  {
                 sh 'bin/test.sh'
             }
         }
         stage ('Release confirm') {
-            when { branch 'release/v*' }
+            when { expression { env.BRANCH_NAME.startsWith('release/v') || env.BRANCH_NAME.startsWith('hotfix/v') } }
             steps {
                 jplPromoteBuild(cfg)
             }
         }
         stage ('Release finish') {
             agent { label 'docker' }
-            when { expression { env.BRANCH_NAME.startsWith('release/v') && cfg.promoteBuild.enabled } }
+            when { expression { env.BRANCH_NAME.startsWith('release/v') || env.BRANCH_NAME.startsWith('hotfix/v') } }
             steps {
                 jplCloseRelease(cfg)
-            }
-        }
-        stage ('PR Clean') {
-            agent { label 'docker' }
-            when { branch 'PR-*' }
-            steps {
-                deleteDir()
             }
         }
     }
