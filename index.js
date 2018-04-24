@@ -40,13 +40,13 @@ function readReport() {
             } 
         } 
     }
-    console.log('############################');
+    console.log('#################################');
     console.log('Runned steps: ' + totaltest);
     console.log('Failed steps: ' + failure);
-
+    console.log('#################################');
     if((totaltest / maxFailedTest) < failure ){
         try {
-            throw new error('There were more than 10% of failed tests.');
+            throw new error('There were more than' , maxFailedTest,'% of failed tests.');
         } catch(e){
             console.log('Test execution was failed.');
         }
